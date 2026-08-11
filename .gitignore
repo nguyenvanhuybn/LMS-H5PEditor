@@ -1,0 +1,30 @@
+# Node / Next.js
+node_modules/
+.next/
+npm-debug.log*
+*.tsbuildinfo
+
+# .NET
+**/bin/
+**/obj/
+**/data/*.db*
+
+# H5P runtime data (keep core/editor source assets)
+services/h5p-engine/h5p/content/
+services/h5p-engine/h5p/libraries/
+services/h5p-engine/h5p/temp/
+services/h5p-engine/h5p/config.json
+services/h5p-engine/h5p/cache.json
+
+# Environment and IDE
+.env
+.env.local
+.env.*.local
+.vs/
+.vscode/
+.idea/
+*.user
+.runtime/
+
+# Intermediate reference material
+work/

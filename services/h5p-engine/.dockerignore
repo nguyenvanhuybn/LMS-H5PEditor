@@ -1,0 +1,10 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+h5p/content/*
+h5p/libraries/*
+h5p/temp/*
+*.md
+.env*

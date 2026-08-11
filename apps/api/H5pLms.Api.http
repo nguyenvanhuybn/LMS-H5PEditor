@@ -1,0 +1,20 @@
+@api = http://localhost:5050
+
+GET {{api}}/health
+Accept: application/json
+
+###
+
+GET {{api}}/api/contents
+Accept: application/json
+
+###
+
+POST {{api}}/api/contents
+Content-Type: application/json
+
+{
+  "h5pContentId": "replace-with-engine-id",
+  "title": "Nội dung H5P mẫu",
+  "mainLibrary": "H5P.MultiChoice"
+}

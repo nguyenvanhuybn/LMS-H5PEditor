@@ -1,0 +1,64 @@
+services:
+  web:
+    build:
+      context: ./apps/web
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:5050
+        H5P_ENGINE_INTERNAL_URL: http://h5p-engine:3001
+    ports:
+      - "3000:3000"
+    environment:
+      # Server-side only; the package download route uses it to reach the API.
+      INTEGRATION_API_KEY: ${INTEGRATION_API_KEY:-}
+      API_INTERNAL_URL: http://api:8080
+    depends_on:
+      api:
+        condition: service_started
+
+  api:
+    build:
+      context: ./apps/api
+    ports:
+      - "5050:8080"
+    environment:
+      ConnectionStrings__Default: Data Source=/app/data/h5p-lms.db
+      H5p__InternalUrl: http://h5p-engine:3001
+      H5p__PublicUrl: http://localhost:3000/h5p-engine
+      H5p__WebhookSecret: ${H5P_WEBHOOK_SECRET:-dev-only-change-me}
+      H5p__InternalApiKey: ${H5P_INTERNAL_API_KEY:-dev-internal-key-change-me}
+      H5p__SupportedLanguages__0: vi
+      H5p__SupportedLanguages__1: en
+      Integration__ApiKey: ${INTEGRATION_API_KEY:-}
+      Integration__AllowedLmsOrigins__0: ${LMS_ORIGIN:-}
+      Lrs__Enabled: ${LRS_ENABLED:-false}
+      Lrs__Endpoint: ${LRS_ENDPOINT:-}
+      Lrs__Username: ${LRS_USERNAME:-}
+      Lrs__Password: ${LRS_PASSWORD:-}
+      Cors__AllowedOrigins__0: http://localhost:3000
+    volumes:
+      - api-data:/app/data
+    depends_on:
+      h5p-engine:
+        condition: service_healthy
+  h5p-engine:
+    build:
+      context: ./services/h5p-engine
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      H5P_BASE_URL: http://localhost:3000/h5p-engine
+      H5P_DATA_PATH: /data/h5p
+      H5P_ALLOWED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+      H5P_PARENT_ORIGIN: http://localhost:3000
+      H5P_WEBHOOK_URL: http://api:8080/api/h5p/xapi
+      H5P_WEBHOOK_SECRET: ${H5P_WEBHOOK_SECRET:-dev-only-change-me}
+      H5P_INTERNAL_API_KEY: ${H5P_INTERNAL_API_KEY:-dev-internal-key-change-me}
+      H5P_SUPPORTED_LANGUAGES: vi,en
+      H5P_MAX_UPLOAD_MB: 100
+    volumes:
+      - h5p-data:/data/h5p
+
+volumes:
+  api-data:
+  h5p-data:

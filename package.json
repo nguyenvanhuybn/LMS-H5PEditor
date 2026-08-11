@@ -1,0 +1,22 @@
+{
+  "name": "h5p-lms-studio",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "bootstrap": "npm install --ignore-scripts && npm run install:web && npm run install:h5p",
+    "install:web": "cd apps/web && npm install --workspaces=false",
+    "install:h5p": "cd services/h5p-engine && npm install --workspaces=false --install-strategy=nested",
+    "dev": "concurrently --kill-others-on-fail --names API,H5P,WEB --prefix-colors blue,magenta,green \"npm run dev:api\" \"npm run dev:h5p\" \"npm run dev:web\"",
+    "dev:api": "dotnet watch --project apps/api/H5pLms.Api.csproj run --launch-profile http",
+    "dev:h5p": "cross-env PORT=3001 H5P_BASE_URL=http://localhost:3000/h5p-engine H5P_DATA_PATH=./services/h5p-engine/h5p H5P_SUPPORTED_LANGUAGES=vi,en H5P_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000 H5P_PARENT_ORIGIN=http://localhost:3000 H5P_WEBHOOK_URL=http://localhost:5050/api/h5p/xapi H5P_WEBHOOK_SECRET=dev-only-change-me H5P_INTERNAL_API_KEY=dev-internal-key-change-me node services/h5p-engine/src/index.js",
+    "dev:web": "cross-env INTEGRATION_API_KEY=dev-integration-key-change-me API_INTERNAL_URL=http://localhost:5050 npm --prefix apps/web run dev",
+    "build": "npm run build:web && npm run build:api",
+    "build:web": "npm --prefix apps/web run build",
+    "build:api": "dotnet build apps/api/H5pLms.Api.csproj -c Release",
+    "start:h5p": "npm run dev:h5p"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "cross-env": "^7.0.3"
+  }
+}

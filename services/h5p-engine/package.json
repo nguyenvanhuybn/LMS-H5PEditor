@@ -1,0 +1,25 @@
+{
+  "name": "h5p-lms-engine",
+  "version": "1.0.0",
+  "description": "H5P editor/player sidecar for the ASP.NET Core LMS",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "@lumieducation/h5p-express": "10.0.5",
+    "@lumieducation/h5p-server": "10.0.4",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-fileupload": "^1.5.2",
+    "multer": "^1.4.5-lts.1",
+    "sanitize-html": "2.17.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
