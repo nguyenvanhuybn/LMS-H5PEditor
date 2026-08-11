@@ -243,7 +243,10 @@ async function ensureDirectories() {
             hubRegistrationEndpoint: 'https://api.h5p.org/v1/sites',
             hubContentTypesEndpoint: 'https://api.h5p.org/v1/content-types/',
             sendUsageStatistics: false,
-            uuid: crypto.randomUUID(),
+            // The Hub must issue the UUID. Generating one locally makes the
+            // Hub reject the catalog request and leaves the editor with no
+            // content types.
+            uuid: '',
             siteType: 'local',
             libraryConfig: {}
         };

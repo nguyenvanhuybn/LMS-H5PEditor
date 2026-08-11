@@ -14,7 +14,15 @@ export function H5pEditorFrame({ contentId }: { contentId?: string }) {
   const [url, setUrl] = useState<string>();
   const [error, setError] = useState<string>();
   const [frameHeight, setFrameHeight] = useState(680);
+  const [viewportHeight, setViewportHeight] = useState(680);
   const frameRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    const updateViewportHeight = () => setViewportHeight(Math.max(680, window.innerHeight - 112));
+    updateViewportHeight();
+    window.addEventListener("resize", updateViewportHeight);
+    return () => window.removeEventListener("resize", updateViewportHeight);
+  }, []);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
@@ -93,7 +101,7 @@ export function H5pEditorFrame({ contentId }: { contentId?: string }) {
             className="h5p-editor-frame"
             src={url}
             title={contentId ? t("editor.frameTitleEdit") : t("editor.frameTitleNew")}
-            style={{ height: frameHeight }}
+            style={{ height: Math.max(frameHeight, viewportHeight) }}
           />
         )}
       </Card>

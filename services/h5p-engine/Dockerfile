@@ -21,6 +21,7 @@ RUN npm ci --only=production
 COPY src/ ./src/
 COPY h5p/core/ /opt/h5p-seed/core/
 COPY h5p/editor/ /opt/h5p-seed/editor/
+COPY seed-libraries/ /opt/h5p-seed/libraries/
 COPY docker-entrypoint.sh /usr/local/bin/h5p-entrypoint
 
 # Create directories for H5P data (will be mounted as volumes)
