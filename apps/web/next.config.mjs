@@ -3,10 +3,13 @@ import { fileURLToPath } from "node:url";
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 const h5pEngineInternalUrl = (process.env.H5P_ENGINE_INTERNAL_URL || "http://localhost:3001").replace(/\/$/, "");
+const isVercel = process.env.VERCEL === "1";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone",
+  // Vercel packages Next.js with its own deployment adapter. Standalone output
+  // is retained for the Docker image, where the minimal server is required.
+  ...(isVercel ? {} : { output: "standalone" }),
   reactStrictMode: true,
   turbopack: {
     root: projectRoot,
