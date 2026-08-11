@@ -1,0 +1,11 @@
+@echo off
+setlocal
+
+rem The browser API path (/backend) was compiled into this IIS package.
+set PORT=3000
+set HOSTNAME=127.0.0.1
+set API_INTERNAL_URL=http://127.0.0.1:5050
+set H5P_ENGINE_INTERNAL_URL=http://127.0.0.1:3001
+set INTEGRATION_API_KEY=CHANGE_ME_INTEGRATION_API_KEY
+
+node "%~dp0..\web\server.js"

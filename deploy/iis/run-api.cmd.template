@@ -1,0 +1,17 @@
+@echo off
+setlocal
+
+rem Replace h5p.example.com and all CHANGE_ME values before installing this as a service.
+set ASPNETCORE_ENVIRONMENT=Production
+set ASPNETCORE_URLS=http://127.0.0.1:5050
+set ConnectionStrings__Default=Data Source=C:\H5P\data\h5p-lms.db
+set H5p__InternalUrl=http://127.0.0.1:3001
+set H5p__PublicUrl=https://h5p.example.com/h5p-engine
+set H5p__WebhookSecret=CHANGE_ME_WEBHOOK_SECRET
+set H5p__InternalApiKey=CHANGE_ME_INTERNAL_API_KEY
+set H5p__SupportedLanguages__0=vi
+set H5p__SupportedLanguages__1=en
+set Cors__AllowedOrigins__0=https://h5p.example.com
+set Integration__ApiKey=CHANGE_ME_INTEGRATION_API_KEY
+
+dotnet "%~dp0..\api\H5pLms.Api.dll"

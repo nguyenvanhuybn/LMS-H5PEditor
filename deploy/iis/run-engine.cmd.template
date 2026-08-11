@@ -1,0 +1,16 @@
+@echo off
+setlocal
+
+rem Replace h5p.example.com and the CHANGE_ME values with the matching API values.
+set PORT=3001
+set H5P_BASE_URL=https://h5p.example.com/h5p-engine
+set H5P_DATA_PATH=C:\H5P\data\h5p
+set H5P_ALLOWED_ORIGINS=https://h5p.example.com
+set H5P_PARENT_ORIGIN=https://h5p.example.com
+set H5P_WEBHOOK_URL=http://127.0.0.1:5050/api/h5p/xapi
+set H5P_WEBHOOK_SECRET=CHANGE_ME_WEBHOOK_SECRET
+set H5P_INTERNAL_API_KEY=CHANGE_ME_INTERNAL_API_KEY
+set H5P_SUPPORTED_LANGUAGES=vi,en
+set H5P_MAX_UPLOAD_MB=100
+
+node "%~dp0..\engine\src\index.js"
