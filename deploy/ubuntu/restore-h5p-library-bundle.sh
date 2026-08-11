@@ -19,7 +19,7 @@ if ! docker volume inspect "$H5P_DATA_VOLUME" >/dev/null 2>&1; then
   exit 1
 fi
 
-expected_checksum="$(awk '{ print $1 }' "$CHECKSUM_PATH")"
+expected_checksum="$(awk '{ print $1 }' "$CHECKSUM_PATH" | tr '[:upper:]' '[:lower:]')"
 actual_checksum="$(sha256sum "$BUNDLE_PATH" | awk '{ print $1 }')"
 if [ "$expected_checksum" != "$actual_checksum" ]; then
   echo "Bundle checksum does not match; restore cancelled."
