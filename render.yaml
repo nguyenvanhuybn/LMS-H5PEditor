@@ -1,0 +1,90 @@
+services:
+  # Public ASP.NET API consumed by the Vercel frontend. Its SQLite data lives
+  # on a persistent disk, so content metadata survives redeploys and restarts.
+  - type: web
+    name: lms-h5p-editor-api
+    runtime: docker
+    region: singapore
+    plan: starter
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: ./apps/api
+    autoDeploy: true
+    disk:
+      name: api-data
+      mountPath: /app/data
+      sizeGB: 1
+    envVars:
+      - key: PORT
+        value: "8080"
+      - key: ConnectionStrings__Default
+        value: Data Source=/app/data/h5p-lms.db
+      - key: H5p__InternalUrl
+        fromService:
+          type: web
+          name: lms-h5p-editor-engine
+          property: hostport
+      - key: H5p__PublicUrl
+        fromService:
+          type: web
+          name: lms-h5p-editor-engine
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: H5p__WebhookSecret
+        generateValue: true
+      - key: H5p__InternalApiKey
+        generateValue: true
+      - key: H5p__SupportedLanguages__0
+        value: vi
+      - key: H5p__SupportedLanguages__1
+        value: en
+      - key: Cors__AllowedOrigins__0
+        value: https://lms-h5-p-editor.vercel.app
+      - key: Integration__ApiKey
+        sync: false
+
+  # Public H5P editor/player. The Vercel frontend embeds this service in an
+  # iframe, while the API uses Render's private network for management calls.
+  - type: web
+    name: lms-h5p-editor-engine
+    runtime: docker
+    region: singapore
+    plan: starter
+    dockerfilePath: ./services/h5p-engine/Dockerfile
+    dockerContext: ./services/h5p-engine
+    autoDeploy: true
+    disk:
+      name: h5p-data
+      mountPath: /data/h5p
+      sizeGB: 1
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: H5P_BASE_URL
+        fromService:
+          type: web
+          name: lms-h5p-editor-engine
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: H5P_DATA_PATH
+        value: /data/h5p
+      - key: H5P_ALLOWED_ORIGINS
+        value: https://lms-h5-p-editor.vercel.app
+      - key: H5P_PARENT_ORIGIN
+        value: https://lms-h5-p-editor.vercel.app
+      - key: H5P_WEBHOOK_URL
+        fromService:
+          type: web
+          name: lms-h5p-editor-api
+          property: hostport
+      - key: H5P_WEBHOOK_SECRET
+        fromService:
+          type: web
+          name: lms-h5p-editor-api
+          envVarKey: H5p__WebhookSecret
+      - key: H5P_INTERNAL_API_KEY
+        fromService:
+          type: web
+          name: lms-h5p-editor-api
+          envVarKey: H5p__InternalApiKey
+      - key: H5P_SUPPORTED_LANGUAGES
+        value: vi,en
+      - key: H5P_MAX_UPLOAD_MB
+        value: "100"

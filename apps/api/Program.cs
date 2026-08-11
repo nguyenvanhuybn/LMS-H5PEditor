@@ -16,7 +16,9 @@ builder.Services.AddSingleton<PackageBuilder>();
 builder.Services.AddHttpClient<H5pEngineClient>((services, client) =>
 {
     var options = services.GetRequiredService<IOptions<H5pOptions>>().Value;
-    client.BaseAddress = new Uri(options.InternalUrl.TrimEnd('/') + "/");
+    // Render's Blueprint service reference exposes an internal address as
+    // "host:port". Accept that compact form as well as ordinary HTTP(S) URLs.
+    client.BaseAddress = new Uri(NormalizeHttpUrl(options.InternalUrl).TrimEnd('/') + "/");
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 builder.Services.AddHttpClient<LrsClient>((services, client) =>
@@ -278,6 +280,15 @@ static bool SecretsMatch(string supplied, string configured)
     var left = SHA256.HashData(Encoding.UTF8.GetBytes(supplied));
     var right = SHA256.HashData(Encoding.UTF8.GetBytes(configured));
     return CryptographicOperations.FixedTimeEquals(left, right);
+}
+
+static string NormalizeHttpUrl(string value)
+{
+    var trimmed = value.Trim();
+    return trimmed.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+           trimmed.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
+        ? trimmed
+        : $"http://{trimmed}";
 }
 
 static double GetDouble(JsonElement element, string property, double fallback = 0) =>

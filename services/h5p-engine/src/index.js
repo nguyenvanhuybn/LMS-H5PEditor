@@ -34,7 +34,10 @@ const H5P_ALLOWED_ORIGINS = (process.env.H5P_ALLOWED_ORIGINS || 'http://localhos
     .map(value => value.trim())
     .filter(Boolean);
 const H5P_PARENT_ORIGIN = process.env.H5P_PARENT_ORIGIN || H5P_ALLOWED_ORIGINS[0] || 'http://localhost:3000';
-const H5P_WEBHOOK_URL = process.env.H5P_WEBHOOK_URL || 'http://localhost:5050/api/h5p/xapi';
+// Render service references use the private-network "host:port" form. Make
+// it usable as a fetch URL while keeping ordinary HTTP(S) URLs unchanged.
+const normalizeHttpUrl = (value) => /^https?:\/\//i.test(value) ? value : `http://${value}`;
+const H5P_WEBHOOK_URL = normalizeHttpUrl(process.env.H5P_WEBHOOK_URL || 'http://localhost:5050/api/h5p/xapi');
 const H5P_WEBHOOK_SECRET = process.env.H5P_WEBHOOK_SECRET || 'dev-only-change-me';
 const H5P_INTERNAL_API_KEY = process.env.H5P_INTERNAL_API_KEY || 'dev-internal-key-change-me';
 const H5P_MAX_UPLOAD_MB = Number(process.env.H5P_MAX_UPLOAD_MB || 100);
