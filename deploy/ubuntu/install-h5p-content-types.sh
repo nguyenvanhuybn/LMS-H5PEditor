@@ -22,7 +22,7 @@ fi
 echo "Installing H5P content types: $H5P_CONTENT_TYPES"
 echo "Target volume: $H5P_DATA_VOLUME"
 
-docker run --rm \
+docker run --rm --interactive \
   --volume "$H5P_DATA_VOLUME:/target" \
   node:22-alpine \
   sh -s -- $H5P_CONTENT_TYPES <<'CONTAINER_SCRIPT'
