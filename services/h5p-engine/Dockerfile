@@ -19,13 +19,21 @@ RUN npm ci --only=production
 
 # Copy application code
 COPY src/ ./src/
+COPY scripts/ ./scripts/
+# Vietnamese strings the engine applies at runtime: the content-type UI copy the
+# player rewrites, and the semantics labels the editor overrides. Without these
+# the image silently falls back to English.
+COPY translations/ ./translations/
 COPY h5p/core/ /opt/h5p-seed/core/
 COPY h5p/editor/ /opt/h5p-seed/editor/
 COPY seed-libraries/ /opt/h5p-seed/libraries/
+# Versioned content type bundle, unpacked into the data volume on first boot so
+# a new environment does not have to re-download anything from the H5P Hub.
+COPY library-bundles/ /opt/h5p-seed/library-bundles/
 COPY docker-entrypoint.sh /usr/local/bin/h5p-entrypoint
 
 # Create directories for H5P data (will be mounted as volumes)
-RUN mkdir -p /data/h5p/content /data/h5p/libraries /data/h5p/temp /data/h5p/core /data/h5p/editor
+RUN mkdir -p /data/h5p/content /data/h5p/libraries /data/h5p/temp /data/h5p/user-data /data/h5p/core /data/h5p/editor
 
 # Environment variables with sensible defaults
 ENV NODE_ENV=production

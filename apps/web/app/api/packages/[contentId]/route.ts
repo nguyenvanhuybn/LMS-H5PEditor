@@ -31,7 +31,10 @@ export async function GET(
     return Response.json({ error: "Thiếu lmsOrigin." }, { status: 400 });
   }
 
-  const query = new URLSearchParams({ format, lmsOrigin });
+  // Off unless asked: the host's own runtime is the system of record for an
+  // exported package.
+  const relayResults = requested.get("relayResults") === "true";
+  const query = new URLSearchParams({ format, lmsOrigin, relayResults: String(relayResults) });
   const response = await integrationFetch(
     `/api/integration/contents/${encodeURIComponent(contentId)}/package?${query}`,
   );

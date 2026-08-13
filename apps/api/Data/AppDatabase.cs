@@ -1,5 +1,6 @@
 using System.Text;
 using H5pLms.Api.Models;
+using H5pLms.Api.Services;
 using Microsoft.Data.Sqlite;
 
 namespace H5pLms.Api.Data;
@@ -54,6 +55,32 @@ public sealed class AppDatabase(IConfiguration configuration)
             PRAGMA optimize;
             """;
         await command.ExecuteNonQueryAsync(cancellationToken);
+
+        await AddColumnIfMissingAsync(connection, "h5p_contents", "completion_mode", "TEXT NOT NULL DEFAULT 'Default'", cancellationToken);
+        await AddColumnIfMissingAsync(connection, "h5p_contents", "pass_ratio", "REAL NOT NULL DEFAULT 0.5", cancellationToken);
+        await AddColumnIfMissingAsync(connection, "h5p_contents", "min_position", "INTEGER NOT NULL DEFAULT 1", cancellationToken);
+    }
+
+    /// <summary>
+    /// SQLite has no "ADD COLUMN IF NOT EXISTS", and databases created before the
+    /// completion rule existed must keep working, so check the table first.
+    /// </summary>
+    private static async Task AddColumnIfMissingAsync(
+        SqliteConnection connection,
+        string table,
+        string column,
+        string definition,
+        CancellationToken cancellationToken)
+    {
+        await using var probe = connection.CreateCommand();
+        probe.CommandText = $"SELECT COUNT(*) FROM pragma_table_info('{table}') WHERE name = $column;";
+        probe.Parameters.AddWithValue("$column", column);
+        var exists = Convert.ToInt64(await probe.ExecuteScalarAsync(cancellationToken)) > 0;
+        if (exists) return;
+
+        await using var alter = connection.CreateCommand();
+        alter.CommandText = $"ALTER TABLE {table} ADD COLUMN {column} {definition};";
+        await alter.ExecuteNonQueryAsync(cancellationToken);
     }
 
     public async Task<IReadOnlyList<ContentItem>> ListContentsAsync(CancellationToken cancellationToken)
@@ -64,6 +91,7 @@ public sealed class AppDatabase(IConfiguration configuration)
         command.CommandText = """
             SELECT c.id, c.h5p_content_id, c.title, c.main_library, c.status,
                    c.created_at, c.updated_at,
+                   c.completion_mode, c.pass_ratio, c.min_position,
                    COUNT(g.id) AS attempt_count,
                    (SELECT g2.score_scaled
                       FROM h5p_grades g2
@@ -91,6 +119,7 @@ public sealed class AppDatabase(IConfiguration configuration)
         command.CommandText = """
             SELECT c.id, c.h5p_content_id, c.title, c.main_library, c.status,
                    c.created_at, c.updated_at,
+                   c.completion_mode, c.pass_ratio, c.min_position,
                    COUNT(g.id) AS attempt_count,
                    (SELECT g2.score_scaled
                       FROM h5p_grades g2
@@ -133,6 +162,33 @@ public sealed class AppDatabase(IConfiguration configuration)
         await command.ExecuteNonQueryAsync(cancellationToken);
 
         return (await GetContentAsync(request.H5pContentId, cancellationToken))!;
+    }
+
+    public async Task<ContentItem?> UpdateCompletionRuleAsync(
+        string h5pContentId,
+        CompletionRule rule,
+        CancellationToken cancellationToken)
+    {
+        var normalised = rule.Normalised();
+
+        await using var connection = await OpenAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText = """
+            UPDATE h5p_contents
+               SET completion_mode = $mode,
+                   pass_ratio = $passRatio,
+                   min_position = $minPosition,
+                   updated_at = $now
+             WHERE h5p_content_id = $h5pContentId;
+            """;
+        command.Parameters.AddWithValue("$mode", normalised.Mode.ToString());
+        command.Parameters.AddWithValue("$passRatio", normalised.PassRatio);
+        command.Parameters.AddWithValue("$minPosition", normalised.MinPosition);
+        command.Parameters.AddWithValue("$now", DateTimeOffset.UtcNow.ToString("O"));
+        command.Parameters.AddWithValue("$h5pContentId", h5pContentId);
+
+        var affected = await command.ExecuteNonQueryAsync(cancellationToken);
+        return affected == 0 ? null : await GetContentAsync(h5pContentId, cancellationToken);
     }
 
     public async Task<bool> DeleteContentAsync(string h5pContentId, CancellationToken cancellationToken)
@@ -294,6 +350,11 @@ public sealed class AppDatabase(IConfiguration configuration)
         }
     }
 
+    /// <summary>
+    /// Applies the content's completion rule to what H5P reported. Returns null
+    /// when the content is not registered, and null when the rule says this
+    /// event is not worth recording (a progress ping short of the target).
+    /// </summary>
     public async Task<GradeItem?> SaveGradeAsync(
         string h5pContentId,
         string userId,
@@ -302,14 +363,21 @@ public sealed class AppDatabase(IConfiguration configuration)
         bool completed,
         bool success,
         string verb,
+        int? position,
         string statementJson,
         CancellationToken cancellationToken)
     {
         var content = await GetContentAsync(h5pContentId, cancellationToken);
         if (content is null) return null;
 
-        var id = Guid.NewGuid().ToString("N");
         var scaled = max > 0 ? Math.Clamp(raw / max, 0, 1) : 0;
+        var verdict = CompletionEvaluator.Evaluate(content.Completion, verb, scaled, completed, success, position);
+        if (!verdict.Record) return null;
+
+        completed = verdict.Completed;
+        success = verdict.Success;
+
+        var id = Guid.NewGuid().ToString("N");
         var attemptedAt = DateTimeOffset.UtcNow;
 
         await using var connection = await OpenAsync(cancellationToken);
@@ -356,6 +424,9 @@ public sealed class AppDatabase(IConfiguration configuration)
         reader.GetString(4),
         DateTimeOffset.Parse(reader.GetString(5)),
         DateTimeOffset.Parse(reader.GetString(6)),
-        reader.GetInt32(7),
-        reader.IsDBNull(8) ? null : reader.GetDouble(8));
+        reader.GetInt32(10),
+        reader.IsDBNull(11) ? null : reader.GetDouble(11),
+        Enum.TryParse<CompletionMode>(reader.GetString(7), ignoreCase: true, out var mode) ? mode : CompletionMode.Default,
+        reader.GetDouble(8),
+        reader.GetInt32(9));
 }

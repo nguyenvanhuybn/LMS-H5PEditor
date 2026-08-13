@@ -3,6 +3,44 @@ using System.Text.Json.Serialization;
 
 namespace H5pLms.Api.Models;
 
+/// <summary>How an attempt is judged complete for a piece of content.</summary>
+public enum CompletionMode
+{
+    /// <summary>Take completion and success straight from the H5P statement.</summary>
+    Default,
+
+    /// <summary>Scaled score must reach <see cref="CompletionRule.PassRatio"/>.</summary>
+    Score,
+
+    /// <summary>
+    /// Learner must reach a step/slide number. Only content types that emit an
+    /// xAPI "progressed" statement carrying an ending-point can report this.
+    /// </summary>
+    Position
+}
+
+/// <summary>
+/// The completion rule travels with the content: the API applies it when a
+/// result arrives, and the SCORM/xAPI packages carry it so the LMS reaches the
+/// same verdict on its own.
+/// </summary>
+public sealed record CompletionRule(
+    CompletionMode Mode = CompletionMode.Default,
+    double PassRatio = 0.5,
+    int MinPosition = 1)
+{
+    public static CompletionRule Default { get; } = new();
+
+    /// <summary>Percentage form, which is what SCORM 1.2 masteryscore expects.</summary>
+    public int PassPercent => (int)Math.Round(Math.Clamp(PassRatio, 0, 1) * 100);
+
+    public CompletionRule Normalised() => this with
+    {
+        PassRatio = Math.Clamp(PassRatio, 0, 1),
+        MinPosition = Math.Max(1, MinPosition)
+    };
+}
+
 public sealed record ContentItem(
     string Id,
     string H5pContentId,
@@ -12,7 +50,18 @@ public sealed record ContentItem(
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt,
     int AttemptCount = 0,
-    double? LatestScore = null);
+    double? LatestScore = null,
+    CompletionMode CompletionMode = CompletionMode.Default,
+    double PassRatio = 0.5,
+    int MinPosition = 1)
+{
+    public CompletionRule Completion => new(CompletionMode, PassRatio, MinPosition);
+}
+
+public sealed record CompletionRuleRequest(
+    string Mode,
+    double? PassRatio,
+    int? MinPosition);
 
 public sealed record ContentRegistrationRequest(
     string H5pContentId,

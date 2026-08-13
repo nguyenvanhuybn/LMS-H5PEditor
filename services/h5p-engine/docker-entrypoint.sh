@@ -18,4 +18,16 @@ if [ ! -f "$H5P_DATA_PATH/libraries/H5P.IFrameEmbed-1.0/library.json" ]; then
   cp -R /opt/h5p-seed/libraries/H5P.IFrameEmbed-1.0 "$H5P_DATA_PATH/libraries/"
 fi
 
+# Unpack the versioned content type bundle if the image carries one. The restore
+# step never downgrades a library that was updated at runtime, and it is a no-op
+# once the volume already holds that version, so it is safe on every boot.
+if [ -d /opt/h5p-seed/library-bundles ] && \
+   [ -n "$(find /opt/h5p-seed/library-bundles -name '*.zip' -print -quit 2>/dev/null)" ]; then
+  echo "Restoring H5P library bundle…"
+  # A failure here must not stop the engine: the Hub remains available as a
+  # fallback, and an unusable bundle should not take the whole service down.
+  H5P_BUNDLE_DIR=/opt/h5p-seed/library-bundles node /app/scripts/restore-libraries.mjs \
+    || echo "Library bundle restore failed; continuing with whatever is on the volume."
+fi
+
 exec "$@"

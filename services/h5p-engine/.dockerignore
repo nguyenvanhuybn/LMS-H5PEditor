@@ -6,5 +6,6 @@ README.md
 h5p/content/*
 h5p/libraries/*
 h5p/temp/*
+h5p/user-data/*
 *.md
 .env*

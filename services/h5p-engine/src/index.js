@@ -20,6 +20,7 @@ import fs from 'fs/promises';
 import { existsSync, readFileSync } from 'fs';
 import { createRequire } from 'module';
 import * as H5P from '@lumieducation/h5p-server';
+import { loadCatalog, localizePlayerModel, localizeSemantics } from './localize-content.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -77,12 +78,17 @@ function normalizeOrigin(value) {
 
 const H5P_SELF_ORIGIN = normalizeOrigin(H5P_BASE_URL);
 const H5P_EMBEDDER_ORIGINS = new Set(H5P_ALLOWED_ORIGINS.map(normalizeOrigin));
+// "*" opens embedding to every origin: any page may host an exported package
+// and receive that learner's results via postMessage.
+const H5P_ALLOW_ANY_EMBEDDER = H5P_EMBEDDER_ORIGINS.has('*');
 const H5P_CORS_ORIGINS = new Set([...H5P_EMBEDDER_ORIGINS, H5P_SELF_ORIGIN]);
 
 function getEmbedderOrigin(returnUrl) {
     try {
+        // Even with the wildcard the postMessage target stays the embedder's
+        // exact origin — results are never broadcast with a literal "*".
         const origin = new URL(String(returnUrl)).origin;
-        if (H5P_EMBEDDER_ORIGINS.has(origin)) return origin;
+        if (H5P_ALLOW_ANY_EMBEDDER || H5P_EMBEDDER_ORIGINS.has(origin)) return origin;
     } catch {}
 
     return normalizeOrigin(H5P_PARENT_ORIGIN);
@@ -123,7 +129,7 @@ app.use((req, res, next) => {
 // requests inside the H5P iframe can include the engine origin in Origin.
 app.use(cors({
     origin(origin, callback) {
-        if (!origin || H5P_CORS_ORIGINS.has(normalizeOrigin(origin))) return callback(null, true);
+        if (!origin || H5P_ALLOW_ANY_EMBEDDER || H5P_CORS_ORIGINS.has(normalizeOrigin(origin))) return callback(null, true);
         return callback(new Error('Origin is not allowed by H5P Engine CORS policy.'));
     },
     credentials: true,
@@ -224,12 +230,16 @@ const contentPath = path.join(h5pBasePath, 'content');
 const tempPath = path.join(h5pBasePath, 'temp');
 const configPath = path.join(h5pBasePath, 'config.json');
 const cachePath = path.join(h5pBasePath, 'cache.json');
+// Where a learner's in-progress state lives, so leaving and coming back resumes
+// instead of restarting.
+const userDataPath = path.join(h5pBasePath, 'user-data');
 
 // Ensure directories exist
 async function ensureDirectories() {
     await fs.mkdir(librariesPath, { recursive: true });
     await fs.mkdir(contentPath, { recursive: true });
     await fs.mkdir(tempPath, { recursive: true });
+    await fs.mkdir(userDataPath, { recursive: true });
 
     // Create default config if not exists
     try {
@@ -279,6 +289,7 @@ function createUser(req) {
 // Initialize H5P
 let h5pEditor;
 let h5pPlayer;
+let contentUserDataStorage;
 
 // h5p-server asks for translations by i18next-style key ("namespace:key").
 // Returning the key unchanged is what makes the editor render labels such as
@@ -395,6 +406,9 @@ async function initH5P() {
 
     const cacheStorage = await H5P.fsImplementations.JsonStorage.create(cachePath);
     const temporaryStorage = new H5P.fsImplementations.DirectoryTemporaryFileStorage(tempPath);
+    // Without this, H5P has nowhere to keep a learner's progress and every
+    // relaunch starts from scratch.
+    contentUserDataStorage = new H5P.fsImplementations.FileContentUserDataStorage(userDataPath);
 
     h5pEditor = new H5P.H5PEditor(
         cacheStorage,
@@ -403,7 +417,9 @@ async function initH5P() {
         contentStorage,
         temporaryStorage,
         translationCallback,
-        urlGenerator
+        urlGenerator,
+        undefined,           // options
+        contentUserDataStorage
     );
 
     // Create a proper H5PPlayer instance for playing content
@@ -413,11 +429,58 @@ async function initH5P() {
         config,
         undefined,           // integrationObjectDefaults
         urlGenerator,
-        translationCallback
+        translationCallback,
+        undefined,           // options
+        contentUserDataStorage
     );
 
-    // Custom renderer that omits the download link (default renderer always shows it)
-    h5pPlayer.setRenderer((model) => `<!doctype html>
+    // The editor asks for a library's semantics through getLibraryData. H5P's
+    // own vi.json files cover only a fraction of the strings, so the catalogue
+    // is applied on top of whatever they provide — here rather than in those
+    // files, so a Hub update cannot wipe the translations.
+    const originalGetLibraryData = h5pEditor.getLibraryData.bind(h5pEditor);
+    h5pEditor.getLibraryData = async (machineName, majorVersion, minorVersion, language) => {
+        const data = await originalGetLibraryData(machineName, majorVersion, minorVersion, language);
+        const catalog = loadCatalog(language);
+        if (catalog && data) {
+            try {
+                if (data.semantics) localizeSemantics(data.semantics, catalog);
+
+                // The editor client deep-merges these language files OVER the
+                // semantics after loading, so an untranslated file would undo
+                // everything done above. They are JSON strings of the same
+                // shape, so the same walker applies.
+                for (const key of ['language', 'defaultLanguage']) {
+                    if (typeof data[key] !== 'string') continue;
+                    try {
+                        const parsed = JSON.parse(data[key]);
+                        if (localizeSemantics(parsed?.semantics, catalog) > 0) {
+                            data[key] = JSON.stringify(parsed);
+                        }
+                    } catch {
+                        // Not JSON — leave whatever it is alone.
+                    }
+                }
+            } catch (error) {
+                // Losing a translation is better than losing the editor.
+                console.warn(`Could not localise semantics for ${machineName}:`, error.message);
+            }
+        }
+        return data;
+    };
+
+    // The model is returned unchanged so the route can localise the content
+    // parameters — which needs the request's language — before the HTML is
+    // built. renderPlayerHtml() below is the renderer that used to live here;
+    // it also omits the download link the default renderer always shows.
+    h5pPlayer.setRenderer((model) => model);
+
+    console.log('H5P initialized successfully');
+}
+
+/** Builds the player page from a (possibly localised) player model. */
+function renderPlayerHtml(model) {
+    return `<!doctype html>
 <html class="h5p-iframe">
 <head>
     <meta charset="utf-8">
@@ -430,9 +493,7 @@ async function initH5P() {
 <body>
     <div class="h5p-content" data-content-id="${model.contentId}"></div>
 </body>
-</html>`);
-
-    console.log('H5P initialized successfully');
+</html>`;
 }
 
 // ============================================================================
@@ -440,11 +501,87 @@ async function initH5P() {
 // ============================================================================
 
 async function setupRoutes() {
-    const { h5pAjaxExpressRouter } = await import('@lumieducation/h5p-express');
+    const {
+        h5pAjaxExpressRouter,
+        contentUserDataExpressRouter,
+        finishedDataExpressRouter
+    } = await import('@lumieducation/h5p-express');
 
     // Middleware to set req.user for H5P router
     app.use((req, res, next) => {
         req.user = createUser(req);
+        next();
+    });
+
+    // The editor appends the page's own query (uiLanguage among it) to every
+    // AJAX call, but the h5p endpoints only read `language`. Filling it in here
+    // localises even requests built from an ajaxPath that predates the
+    // language-in-path fix — e.g. a cached editor page.
+    app.use('/h5p/ajax', (req, res, next) => {
+        // The ajaxPath already carries ?language=…, and h5peditor.js appends
+        // its own language=en to some calls. Express turns the duplicate into
+        // an array, which the endpoint rejects as "Language code vi,en is
+        // invalid" — a 500 the editor shows as an eternal loading spinner.
+        // Keep the first value: that is the page's render language.
+        if (Array.isArray(req.query.language)) {
+            req.query.language = req.query.language[0];
+        } else if (typeof req.query.language === 'string' && req.query.language.includes(',')) {
+            req.query.language = req.query.language.split(',')[0];
+        }
+        if (!req.query.language) {
+            req.query.language = resolveLanguage(req);
+        }
+
+        // The translations action answers with each library's language file —
+        // or English semantics when the file is missing. Untranslated entries
+        // would override the localised labels client-side, so run the catalogue
+        // over them as well.
+        if (req.query.action === 'translations') {
+            const catalog = loadCatalog(req.query.language);
+            if (catalog) {
+                const originalJson = res.json.bind(res);
+                res.json = (body) => {
+                    try {
+                        const entries = body?.data ?? {};
+                        for (const [name, raw] of Object.entries(entries)) {
+                            if (typeof raw !== 'string') continue;
+                            const parsed = JSON.parse(raw);
+                            if (localizeSemantics(parsed?.semantics, catalog) > 0) {
+                                entries[name] = JSON.stringify(parsed);
+                            }
+                        }
+                    } catch (error) {
+                        console.warn('Could not localise translations response:', error.message);
+                    }
+                    return originalJson(body);
+                };
+            }
+        }
+
+        // The content type list (title/summary/description per library) comes
+        // from the H5P Hub in English only; swap what the catalogue covers.
+        if (req.query.action === 'content-type-cache') {
+            const catalog = loadCatalog(req.query.language);
+            if (catalog) {
+                const originalJson = res.json.bind(res);
+                res.json = (body) => {
+                    try {
+                        // Titles stay untranslated: they are product names the
+                        // author searches by, and only a random subset would
+                        // have catalogue hits anyway.
+                        for (const lib of body?.libraries ?? []) {
+                            for (const key of ['summary', 'description']) {
+                                const translated = catalog[lib?.[key]];
+                                if (typeof translated === 'string' && translated) lib[key] = translated;
+                            }
+                        }
+                    } catch (error) {
+                        console.warn('Could not localise content type cache:', error.message);
+                    }
+                    return originalJson(body);
+                };
+            }
+        }
         next();
     });
 
@@ -480,6 +617,10 @@ async function setupRoutes() {
         )
     );
 
+    // The player's integration already points at /contentUserData and
+    // /finishedData; without these routers those calls 404 and progress is lost.
+    app.use('/', contentUserDataExpressRouter(h5pEditor.contentUserDataManager, h5pEditor.config));
+    app.use('/', finishedDataExpressRouter(h5pEditor.contentUserDataManager, h5pEditor.config));
 }
 
 // Global error handler for H5P routes - must be added after setupRoutes()
@@ -517,6 +658,15 @@ app.use((req, res, next) => {
         return res.status(401).json({ error: 'Unauthorized' });
     }
     next();
+});
+
+/**
+ * Origins this engine will postMessage results to. The package builder checks
+ * this before producing a package, so an origin missing from the allow-list is
+ * reported at build time instead of silently dropping every result at runtime.
+ */
+app.get('/api/embed-origins', (req, res) => {
+    res.json({ origins: [...H5P_EMBEDDER_ORIGINS] });
 });
 
 // List all content
@@ -606,19 +756,68 @@ app.get('/play/:contentId', async (req, res) => {
     try {
         const user = createUser(req);
         const contentId = req.params.contentId;
-        // h5pPlayer.render() returns complete HTML with the default renderer
-        let playerHtml = await h5pPlayer.render(
+
+        // A SCORM/xAPI host owns the attempt lifecycle: when it launches without
+        // suspend data it is starting a fresh attempt, and the learner must not
+        // silently resume the previous one. Absent the parameter we resume, which
+        // is what the LMS's own player wants.
+        if (req.query.resume === '0') {
+            try {
+                await h5pEditor.contentUserDataManager.deleteAllContentUserDataByUser(user.id, user);
+            } catch (error) {
+                console.warn(`Could not clear saved state for ${user.id}:`, error.message);
+            }
+        }
+
+        // Default on so the LMS's own player keeps recording results; an export
+        // that reports through SCORM turns it off with relay=0.
+        const relayResults = req.query.relay !== '0';
+
+        const language = resolveLanguage(req);
+
+        // The renderer is set to return the model, so the content's own UI
+        // strings can be localised before the page is built.
+        const playerModel = await h5pPlayer.render(
             contentId,
             user,
-            resolveLanguage(req),
+            language,
             {
                 showCopyButton: false,
                 showDownloadButton: false,
                 showFrame: true,
                 showH5PIcon: false,
-                showLicenseButton: false
+                showLicenseButton: false,
+                // With results going to the host's runtime, H5P must not also
+                // post the learner's state back here on a timer — that is the
+                // contentUserData traffic an LMS operator sees and does not want.
+                readOnlyState: !relayResults
             }
         );
+
+        // Content authored in another language keeps that language's button
+        // labels in its own parameters; swap the untouched defaults over so the
+        // whole page reads in one language.
+        try {
+            const replaced = await localizePlayerModel(
+                playerModel,
+                language,
+                (library) => h5pEditor.libraryManager.getSemantics(library)
+            );
+            if (replaced && H5P_DEBUG) {
+                console.log(`Localised ${replaced} UI string(s) to "${language}" for content ${contentId}`);
+            }
+        } catch (error) {
+            // A translation failure must not cost the learner the content.
+            console.warn(`Could not localise content ${contentId}:`, error.message);
+        }
+
+        let playerHtml = renderPlayerHtml(playerModel);
+
+        if (!relayResults) {
+            // setFinished is driven by config, not by render options, so the one
+            // remaining call home is switched off in the integration itself.
+            playerHtml = playerHtml.replace('"postUserStatistics": true', '"postUserStatistics": false');
+        }
 
         // Inject H5P init and xAPI tracking script before </body>
         const safeContentId = JSON.stringify(contentId);
@@ -626,11 +825,21 @@ app.get('/play/:contentId', async (req, res) => {
         // A SCORM package embeds this player from the LMS's own origin, so the
         // postMessage target has to follow the embedder instead of the single
         // configured parent. Unlisted origins fall back to H5P_PARENT_ORIGIN.
-        const safeParentOrigin = JSON.stringify(getEmbedderOrigin(req.query.embedOrigin));
+        const embedderOrigin = getEmbedderOrigin(req.query.embedOrigin);
+        const safeParentOrigin = JSON.stringify(embedderOrigin);
+        // Falling back means results would be posted to an origin the embedder
+        // is not listening on, and the host would silently record nothing.
+        const embedOriginRejected = Boolean(req.query.embedOrigin)
+            && normalizeOrigin(String(req.query.embedOrigin)) !== embedderOrigin;
+        const safeRejectedOrigin = JSON.stringify(String(req.query.embedOrigin || ''));
         // Absolute, not "/api/xapi-relay": the player is served under the LMS
         // proxy prefix (H5P_BASE_URL), so a root-relative URL would post to the
         // LMS origin instead of the engine and every result would be dropped.
         const safeRelayUrl = JSON.stringify(`${H5P_BASE_URL.replace(/\/$/, '')}/api/xapi-relay`);
+        // A SCORM host that keeps the learner's state in cmi.suspend_data hands
+        // it back on launch. H5P reads the state during init, so initialisation
+        // has to wait for it rather than start and be corrected afterwards.
+        const awaitHostState = req.query.awaitState === '1';
         const xapiScript = `
     <script>
         // Debug H5P initialization
@@ -639,30 +848,172 @@ app.get('/play/:contentId', async (req, res) => {
         console.log('H5PIntegration:', typeof H5PIntegration);
         console.log('jQuery:', typeof jQuery);
 
-        // H5P auto-initializes on jQuery ready, but let's make sure
-        if (typeof jQuery !== 'undefined') {
-            jQuery(document).ready(function() {
-                console.log('jQuery ready, H5P.init exists:', typeof H5P !== 'undefined' && typeof H5P.init);
-                console.log('H5P contents:', H5PIntegration.contents);
-                if (typeof H5P !== 'undefined' && H5P.init) {
-                    console.log('Calling H5P.init...');
-                    H5P.init(document.body);
+        var h5pAwaitHostState = ${awaitHostState};
+        var h5pRelayResults = ${relayResults};
+
+        if (${embedOriginRejected}) {
+            console.error(
+                'H5P: origin ' + ${safeRejectedOrigin} + ' is not in H5P_ALLOWED_ORIGINS, so results ' +
+                'are being posted to ' + ${safeParentOrigin} + ' and the embedding page will never ' +
+                'receive them. Add the origin to H5P_ALLOWED_ORIGINS on the engine.'
+            );
+        }
+        var h5pContentKey = 'cid-' + ${safeContentId};
+        var h5pStarted = false;
+
+        // With results going to the host, H5P must not post the learner's state
+        // back here. saveFreq cannot simply be turned off — H5P also gates
+        // restoring a previous state on it — so the sending functions are
+        // replaced instead, keeping H5P's in-memory cache coherent.
+        if (!h5pRelayResults && typeof H5P !== 'undefined') {
+            H5P.setUserData = function (contentId, dataId, data, extras) {
+                var options = { subContentId: 0 };
+                if (extras && extras.subContentId !== undefined) options.subContentId = extras.subContentId;
+
+                var serialised;
+                try {
+                    serialised = JSON.stringify(data);
+                } catch (error) {
+                    return;
                 }
+
+                var content = H5PIntegration.contents['cid-' + contentId];
+                if (!content) content = H5PIntegration.contents['cid-' + contentId] = {};
+                if (!content.contentUserData) content.contentUserData = {};
+                if (!content.contentUserData[options.subContentId]) content.contentUserData[options.subContentId] = {};
+                content.contentUserData[options.subContentId][dataId] = serialised;
+            };
+
+            H5P.deleteUserData = function () {};
+
+            // Reading falls back to an AJAX call when nothing is preloaded, which
+            // is the last request that would still reach this server. The host's
+            // copy is seeded into the integration before init, so the cache is
+            // the only source that matters here.
+            H5P.getUserData = function (contentId, dataId, done, subContentId) {
+                if (!subContentId) subContentId = 0;
+
+                var content = (H5PIntegration.contents || {})['cid-' + contentId] || {};
+                var preloaded = content.contentUserData;
+                var raw = preloaded && preloaded[subContentId] ? preloaded[subContentId][dataId] : undefined;
+
+                if (raw === undefined) return done(undefined, undefined);
+                if (raw === 'RESET') return done(undefined, null);
+
+                try {
+                    done(undefined, JSON.parse(raw));
+                } catch (error) {
+                    done(error);
+                }
+            };
+        }
+
+        // H5P core initialises itself on document ready. When the host is going
+        // to supply the learner's state we must be the one to start it, or H5P
+        // reads the state before the host's copy has arrived. The flag has to be
+        // set before document ready, which is why this runs inline.
+        if (h5pAwaitHostState && typeof H5P !== 'undefined') {
+            H5P.preventInit = true;
+        }
+
+        function h5pSeedState(serialisedState) {
+            if (!serialisedState) return;
+            try {
+                var content = H5PIntegration.contents[h5pContentKey];
+                if (!content) return;
+                // Same shape H5P.getUserData reads: [subContentId][dataType].
+                content.contentUserData = [{ state: serialisedState }];
+            } catch (error) {
+                console.warn('Could not seed H5P state from host:', error);
+            }
+        }
+
+        function h5pStart() {
+            if (h5pStarted) return;
+            h5pStarted = true;
+            if (typeof H5P !== 'undefined' && H5P.init) {
+                console.log('Calling H5P.init...');
+                H5P.init(document.body);
+            }
+        }
+
+        // H5P bundles jQuery as H5P.jQuery and exposes no global, so anything
+        // gated on a global "jQuery" would never run.
+        function h5pOnReady(callback) {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', callback);
+            } else {
+                callback();
+            }
+        }
+
+        // Without the gate H5P starts itself, which is the behaviour every
+        // ordinary launch relies on; only the host-state path takes over.
+        if (h5pAwaitHostState) {
+            h5pOnReady(function () {
+                // Ask the host for its copy, but never hang on a host that
+                // cannot answer — the server-side state is still there.
+                if (window.parent !== window) {
+                    window.parent.postMessage({ type: 'h5p-state-request', contentId: ${safeContentId} }, ${safeParentOrigin});
+                }
+                window.setTimeout(h5pStart, 3000);
             });
         }
+
+        window.addEventListener('message', function (event) {
+            if (event.origin !== ${safeParentOrigin}) return;
+            if (!event.data || event.data.type !== 'h5p-state-restore') return;
+            if (!h5pStarted) h5pSeedState(event.data.state);
+            h5pStart();
+        });
+
+        // Report the learner's progress upwards so a host can persist it in its
+        // own store (cmi.suspend_data) alongside the server-side copy.
+        function h5pCurrentState() {
+            try {
+                var instance = (H5P.instances || [])[0];
+                if (!instance || typeof instance.getCurrentState !== 'function') return undefined;
+                var state = instance.getCurrentState();
+                return state === undefined ? undefined : JSON.stringify(state);
+            } catch (error) {
+                return undefined;
+            }
+        }
+
+        var h5pLastSentState;
+        function h5pPublishState() {
+            if (window.parent === window) return;
+            var state = h5pCurrentState();
+            if (state === undefined || state === h5pLastSentState) return;
+            h5pLastSentState = state;
+            window.parent.postMessage({
+                type: 'h5p-state',
+                contentId: ${safeContentId},
+                state: state
+            }, ${safeParentOrigin});
+        }
+
+        window.setInterval(h5pPublishState, 5000);
+        window.addEventListener('beforeunload', h5pPublishState);
 
         // Track xAPI events
         H5P.externalDispatcher.on('xAPI', function(event) {
             const statement = event.data.statement;
 
-            // Only track completion and answered events
+            // Results, plus "progressed" because a completion rule can be set on
+            // a step/slide number and that verb is the only carrier of it.
             if (statement.verb && (
                 statement.verb.id.includes('completed') ||
                 statement.verb.id.includes('answered') ||
                 statement.verb.id.includes('passed') ||
-                statement.verb.id.includes('failed')
+                statement.verb.id.includes('failed') ||
+                statement.verb.id.includes('progressed')
             )) {
-                fetch(${safeRelayUrl}, {
+                // An exported package reports through its host's own runtime
+                // (the SCORM API, or the LRS it was launched from). Calling home
+                // as well would make this server a second, competing system of
+                // record, so the embedder can switch it off.
+                if (h5pRelayResults) fetch(${safeRelayUrl}, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1099,6 +1450,19 @@ function wrapEditorHtml(editorHtml, contentId, returnUrl, language = H5P_DEFAULT
     if (language !== 'en' && existsSync(path.join(h5pBasePath, 'editor', 'language', `${language}.js`))) {
         html = html.replace('language/en.js', `language/${language}.js`);
     }
+
+    // Every AJAX call the editor makes is built by appending to ajaxPath, and
+    // h5p-server emits that path without a language. The libraries endpoint
+    // reads `req.query.language`, so without this the semantics come back in
+    // English however the page itself was rendered — which is what leaves the
+    // form full of English labels next to a Vietnamese frame.
+    // Global: the integration object is serialised into this page more than
+    // once (outer page and nested editor frame), and the editor reads the later
+    // copy — patching only the first left the form loading English semantics.
+    html = html.replace(
+        /("ajaxPath":\s*")([^"]*\/h5p\/ajax\?)(action=)/g,
+        `$1$2language=${encodeURIComponent(language)}&$3`
+    );
 
     return html;
 }

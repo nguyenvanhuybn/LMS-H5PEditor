@@ -1,0 +1,1319 @@
+{
+  "version": "2026.08.12-7199d304",
+  "createdAt": "2026-08-12T03:44:43.154Z",
+  "libraryCount": 145,
+  "runnableCount": 57,
+  "libraries": [
+    {
+      "directory": "flowplayer-1.0",
+      "machineName": "flowplayer",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 5,
+      "title": "Flowplayer",
+      "runnable": false
+    },
+    {
+      "directory": "FontAwesome-4.5",
+      "machineName": "FontAwesome",
+      "majorVersion": 4,
+      "minorVersion": 5,
+      "patchVersion": 4,
+      "title": "Font Awesome",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.Accordion-1.0",
+      "machineName": "H5P.Accordion",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 33,
+      "title": "Accordion",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.AdvancedText-1.1",
+      "machineName": "H5P.AdvancedText",
+      "majorVersion": 1,
+      "minorVersion": 1,
+      "patchVersion": 14,
+      "title": "Text",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.AdventCalendar-0.3",
+      "machineName": "H5P.AdventCalendar",
+      "majorVersion": 0,
+      "minorVersion": 3,
+      "patchVersion": 4,
+      "title": "Advent Calendar (beta)",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.AFrame-1.0",
+      "machineName": "H5P.AFrame",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 4,
+      "title": "aframe.js",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.AFrameAR-3.1",
+      "machineName": "H5P.AFrameAR",
+      "majorVersion": 3,
+      "minorVersion": 1,
+      "patchVersion": 1,
+      "title": "aframe-ar.js",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.AFrameOrbitControls-1.3",
+      "machineName": "H5P.AFrameOrbitControls",
+      "majorVersion": 1,
+      "minorVersion": 3,
+      "patchVersion": 0,
+      "title": "aframe-orbit-controls.js",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.Agamotto-1.6",
+      "machineName": "H5P.Agamotto",
+      "majorVersion": 1,
+      "minorVersion": 6,
+      "patchVersion": 11,
+      "title": "Agamotto",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.ArithmeticQuiz-1.1",
+      "machineName": "H5P.ArithmeticQuiz",
+      "majorVersion": 1,
+      "minorVersion": 1,
+      "patchVersion": 25,
+      "title": "Arithmetic Quiz",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.ARScavenger-1.4",
+      "machineName": "H5P.ARScavenger",
+      "majorVersion": 1,
+      "minorVersion": 4,
+      "patchVersion": 1,
+      "title": "AR Scavenger (beta)",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Audio-1.2",
+      "machineName": "H5P.Audio",
+      "majorVersion": 1,
+      "minorVersion": 2,
+      "patchVersion": 14,
+      "title": "Audio",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Audio-1.5",
+      "machineName": "H5P.Audio",
+      "majorVersion": 1,
+      "minorVersion": 5,
+      "patchVersion": 12,
+      "title": "Audio",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.AudioRecorder-1.0",
+      "machineName": "H5P.AudioRecorder",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 33,
+      "title": "Audio Recorder",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Blanks-1.14",
+      "machineName": "H5P.Blanks",
+      "majorVersion": 1,
+      "minorVersion": 14,
+      "patchVersion": 13,
+      "title": "Fill in the Blanks",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.BranchingQuestion-1.0",
+      "machineName": "H5P.BranchingQuestion",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 20,
+      "title": "Branching Question",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.BranchingScenario-1.8",
+      "machineName": "H5P.BranchingScenario",
+      "majorVersion": 1,
+      "minorVersion": 8,
+      "patchVersion": 14,
+      "title": "Branching Scenario",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Chart-1.2",
+      "machineName": "H5P.Chart",
+      "majorVersion": 1,
+      "minorVersion": 2,
+      "patchVersion": 22,
+      "title": "Chart",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.CKEditor-1.0",
+      "machineName": "H5P.CKEditor",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 24,
+      "title": "CKEditor wrapper/loader for H5P",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.Collage-0.3",
+      "machineName": "H5P.Collage",
+      "majorVersion": 0,
+      "minorVersion": 3,
+      "patchVersion": 25,
+      "title": "Collage",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Column-1.18",
+      "machineName": "H5P.Column",
+      "majorVersion": 1,
+      "minorVersion": 18,
+      "patchVersion": 8,
+      "title": "Page",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.ContinuousText-1.2",
+      "machineName": "H5P.ContinuousText",
+      "majorVersion": 1,
+      "minorVersion": 2,
+      "patchVersion": 16,
+      "title": "Continuous Text",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.Cornell-0.3",
+      "machineName": "H5P.Cornell",
+      "majorVersion": 0,
+      "minorVersion": 3,
+      "patchVersion": 2,
+      "title": "Cornell Notes",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.CoursePresentation-1.25",
+      "machineName": "H5P.CoursePresentation",
+      "majorVersion": 1,
+      "minorVersion": 25,
+      "patchVersion": 31,
+      "title": "Course Presentation",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.CoursePresentation-1.26",
+      "machineName": "H5P.CoursePresentation",
+      "majorVersion": 1,
+      "minorVersion": 26,
+      "patchVersion": 3,
+      "title": "Course Presentation",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Crossword-0.5",
+      "machineName": "H5P.Crossword",
+      "majorVersion": 0,
+      "minorVersion": 5,
+      "patchVersion": 13,
+      "title": "Crossword",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Dialogcards-1.9",
+      "machineName": "H5P.Dialogcards",
+      "majorVersion": 1,
+      "minorVersion": 9,
+      "patchVersion": 18,
+      "title": "Dialog Cards",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Dictation-1.3",
+      "machineName": "H5P.Dictation",
+      "majorVersion": 1,
+      "minorVersion": 3,
+      "patchVersion": 3,
+      "title": "Dictation",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.DocumentationTool-1.8",
+      "machineName": "H5P.DocumentationTool",
+      "majorVersion": 1,
+      "minorVersion": 8,
+      "patchVersion": 27,
+      "title": "Documentation Tool",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.DocumentExportPage-1.5",
+      "machineName": "H5P.DocumentExportPage",
+      "majorVersion": 1,
+      "minorVersion": 5,
+      "patchVersion": 19,
+      "title": "Document Export Page",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.DragNBar-1.4",
+      "machineName": "H5P.DragNBar",
+      "majorVersion": 1,
+      "minorVersion": 4,
+      "patchVersion": 8,
+      "title": "Drag N Bar",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.DragNBar-1.5",
+      "machineName": "H5P.DragNBar",
+      "majorVersion": 1,
+      "minorVersion": 5,
+      "patchVersion": 22,
+      "title": "Drag N Bar",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.DragNDrop-1.1",
+      "machineName": "H5P.DragNDrop",
+      "majorVersion": 1,
+      "minorVersion": 1,
+      "patchVersion": 5,
+      "title": "Drag N Drop",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.DragNResize-1.2",
+      "machineName": "H5P.DragNResize",
+      "majorVersion": 1,
+      "minorVersion": 2,
+      "patchVersion": 6,
+      "title": "Drag'N Resize",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.DragQuestion-1.14",
+      "machineName": "H5P.DragQuestion",
+      "majorVersion": 1,
+      "minorVersion": 14,
+      "patchVersion": 23,
+      "title": "Drag and Drop",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.DragText-1.10",
+      "machineName": "H5P.DragText",
+      "majorVersion": 1,
+      "minorVersion": 10,
+      "patchVersion": 17,
+      "title": "Drag the Words",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Essay-1.5",
+      "machineName": "H5P.Essay",
+      "majorVersion": 1,
+      "minorVersion": 5,
+      "patchVersion": 13,
+      "title": "Essay",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.ExportableTextArea-1.3",
+      "machineName": "H5P.ExportableTextArea",
+      "majorVersion": 1,
+      "minorVersion": 3,
+      "patchVersion": 18,
+      "title": "Exportable Text Area",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.FindTheWords-1.4",
+      "machineName": "H5P.FindTheWords",
+      "majorVersion": 1,
+      "minorVersion": 4,
+      "patchVersion": 4,
+      "title": "Find The Words",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Flashcards-1.7",
+      "machineName": "H5P.Flashcards",
+      "majorVersion": 1,
+      "minorVersion": 7,
+      "patchVersion": 10,
+      "title": "Flashcards",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.FontIcons-1.0",
+      "machineName": "H5P.FontIcons",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 6,
+      "title": "H5P.FontIcons",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.FreeTextQuestion-1.0",
+      "machineName": "H5P.FreeTextQuestion",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 16,
+      "title": "Free Text Question",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.GameMap-1.5",
+      "machineName": "H5P.GameMap",
+      "majorVersion": 1,
+      "minorVersion": 5,
+      "patchVersion": 4,
+      "title": "Game Map",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.GoalsAssessmentPage-1.4",
+      "machineName": "H5P.GoalsAssessmentPage",
+      "majorVersion": 1,
+      "minorVersion": 4,
+      "patchVersion": 17,
+      "title": "Goals assessment page",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.GoalsPage-1.5",
+      "machineName": "H5P.GoalsPage",
+      "majorVersion": 1,
+      "minorVersion": 5,
+      "patchVersion": 21,
+      "title": "Goals page",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.GoToQuestion-1.3",
+      "machineName": "H5P.GoToQuestion",
+      "majorVersion": 1,
+      "minorVersion": 3,
+      "patchVersion": 15,
+      "title": "Crossroads",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.GoToScene-0.1",
+      "machineName": "H5P.GoToScene",
+      "majorVersion": 0,
+      "minorVersion": 1,
+      "patchVersion": 0,
+      "title": "Go To Scene",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.GuessTheAnswer-1.5",
+      "machineName": "H5P.GuessTheAnswer",
+      "majorVersion": 1,
+      "minorVersion": 5,
+      "patchVersion": 3,
+      "title": "Guess the Answer",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.GuidedTour-1.0",
+      "machineName": "H5P.GuidedTour",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 6,
+      "title": "Guided tour",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.IFrameEmbed-1.0",
+      "machineName": "H5P.IFrameEmbed",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 29,
+      "title": "Iframe Embedder",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Image-1.1",
+      "machineName": "H5P.Image",
+      "majorVersion": 1,
+      "minorVersion": 1,
+      "patchVersion": 22,
+      "title": "Image",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.ImageHotspotQuestion-1.8",
+      "machineName": "H5P.ImageHotspotQuestion",
+      "majorVersion": 1,
+      "minorVersion": 8,
+      "patchVersion": 22,
+      "title": "Find the Hotspot",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.ImageHotspots-1.10",
+      "machineName": "H5P.ImageHotspots",
+      "majorVersion": 1,
+      "minorVersion": 10,
+      "patchVersion": 18,
+      "title": "Image Hotspots",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.ImageJuxtaposition-1.5",
+      "machineName": "H5P.ImageJuxtaposition",
+      "majorVersion": 1,
+      "minorVersion": 5,
+      "patchVersion": 4,
+      "title": "Image Juxtaposition",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.ImageMultipleHotspotQuestion-1.0",
+      "machineName": "H5P.ImageMultipleHotspotQuestion",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 1,
+      "title": "Find Multiple Hotspots",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.ImagePair-1.4",
+      "machineName": "H5P.ImagePair",
+      "majorVersion": 1,
+      "minorVersion": 4,
+      "patchVersion": 0,
+      "title": "Image Pair",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.ImageSequencing-1.1",
+      "machineName": "H5P.ImageSequencing",
+      "majorVersion": 1,
+      "minorVersion": 1,
+      "patchVersion": 0,
+      "title": "Image Sequencing",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.ImageSlide-1.1",
+      "machineName": "H5P.ImageSlide",
+      "majorVersion": 1,
+      "minorVersion": 1,
+      "patchVersion": 4,
+      "title": "Image Slide",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.ImageSlider-1.1",
+      "machineName": "H5P.ImageSlider",
+      "majorVersion": 1,
+      "minorVersion": 1,
+      "patchVersion": 9,
+      "title": "Image Slider",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.InfoWall-0.4",
+      "machineName": "H5P.InfoWall",
+      "majorVersion": 0,
+      "minorVersion": 4,
+      "patchVersion": 9,
+      "title": "Information Wall",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.InteractiveBook-1.11",
+      "machineName": "H5P.InteractiveBook",
+      "majorVersion": 1,
+      "minorVersion": 11,
+      "patchVersion": 11,
+      "title": "Interactive Book",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.InteractiveVideo-1.26",
+      "machineName": "H5P.InteractiveVideo",
+      "majorVersion": 1,
+      "minorVersion": 26,
+      "patchVersion": 35,
+      "title": "Interactive Video",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.InteractiveVideo-1.27",
+      "machineName": "H5P.InteractiveVideo",
+      "majorVersion": 1,
+      "minorVersion": 27,
+      "patchVersion": 9,
+      "title": "Interactive Video",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.IVHotspot-1.2",
+      "machineName": "H5P.IVHotspot",
+      "majorVersion": 1,
+      "minorVersion": 2,
+      "patchVersion": 17,
+      "title": "Navigation Hotspot",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.JoubelUI-1.3",
+      "machineName": "H5P.JoubelUI",
+      "majorVersion": 1,
+      "minorVersion": 3,
+      "patchVersion": 19,
+      "title": "Joubel UI",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.KewArCode-1.2",
+      "machineName": "H5P.KewArCode",
+      "majorVersion": 1,
+      "minorVersion": 2,
+      "patchVersion": 2,
+      "title": "KewAr Code",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Link-1.3",
+      "machineName": "H5P.Link",
+      "majorVersion": 1,
+      "minorVersion": 3,
+      "patchVersion": 18,
+      "title": "Link",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.MarkTheWords-1.11",
+      "machineName": "H5P.MarkTheWords",
+      "majorVersion": 1,
+      "minorVersion": 11,
+      "patchVersion": 9,
+      "title": "Mark the Words",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.MaterialDesignIcons-1.0",
+      "machineName": "H5P.MaterialDesignIcons",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 0,
+      "title": "Material Design Icons",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.MemoryGame-1.3",
+      "machineName": "H5P.MemoryGame",
+      "majorVersion": 1,
+      "minorVersion": 3,
+      "patchVersion": 29,
+      "title": "Memory Game",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.MultiChoice-1.16",
+      "machineName": "H5P.MultiChoice",
+      "majorVersion": 1,
+      "minorVersion": 16,
+      "patchVersion": 14,
+      "title": "Multiple Choice",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.MultiMediaChoice-0.3",
+      "machineName": "H5P.MultiMediaChoice",
+      "majorVersion": 0,
+      "minorVersion": 3,
+      "patchVersion": 44,
+      "title": "Multimedia Choice",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Nil-1.0",
+      "machineName": "H5P.Nil",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 14,
+      "title": "Label",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.OpenEndedQuestion-1.0",
+      "machineName": "H5P.OpenEndedQuestion",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 28,
+      "title": "Open Ended Question",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.PersonalityQuiz-1.0",
+      "machineName": "H5P.PersonalityQuiz",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 8,
+      "title": "Personality Quiz",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Question-1.4",
+      "machineName": "H5P.Question",
+      "majorVersion": 1,
+      "minorVersion": 4,
+      "patchVersion": 10,
+      "title": "Question",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.Question-1.5",
+      "machineName": "H5P.Question",
+      "majorVersion": 1,
+      "minorVersion": 5,
+      "patchVersion": 15,
+      "title": "Question",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.Questionnaire-1.3",
+      "machineName": "H5P.Questionnaire",
+      "majorVersion": 1,
+      "minorVersion": 3,
+      "patchVersion": 11,
+      "title": "Questionnaire",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.QuestionSet-1.20",
+      "machineName": "H5P.QuestionSet",
+      "majorVersion": 1,
+      "minorVersion": 20,
+      "patchVersion": 31,
+      "title": "Question Set",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Row-1.0",
+      "machineName": "H5P.Row",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 12,
+      "title": "Row",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.RowColumn-1.0",
+      "machineName": "H5P.RowColumn",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 4,
+      "title": "Column",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.Shape-1.0",
+      "machineName": "H5P.Shape",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 5,
+      "title": "Shapes",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.SimpleMultiChoice-1.1",
+      "machineName": "H5P.SimpleMultiChoice",
+      "majorVersion": 1,
+      "minorVersion": 1,
+      "patchVersion": 22,
+      "title": "Simple Multi Choice",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.SingleChoiceSet-1.11",
+      "machineName": "H5P.SingleChoiceSet",
+      "majorVersion": 1,
+      "minorVersion": 11,
+      "patchVersion": 44,
+      "title": "Single Choice Set",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.SortParagraphs-0.11",
+      "machineName": "H5P.SortParagraphs",
+      "majorVersion": 0,
+      "minorVersion": 11,
+      "patchVersion": 9,
+      "title": "Sort the Paragraphs",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.SoundJS-1.0",
+      "machineName": "H5P.SoundJS",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 2,
+      "title": "Sound js api",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.SpeakTheWords-1.5",
+      "machineName": "H5P.SpeakTheWords",
+      "majorVersion": 1,
+      "minorVersion": 5,
+      "patchVersion": 7,
+      "title": "Speak the Words",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.SpeakTheWordsSet-1.3",
+      "machineName": "H5P.SpeakTheWordsSet",
+      "majorVersion": 1,
+      "minorVersion": 3,
+      "patchVersion": 4,
+      "title": "Speak the Words Set",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.StandardPage-1.5",
+      "machineName": "H5P.StandardPage",
+      "majorVersion": 1,
+      "minorVersion": 5,
+      "patchVersion": 16,
+      "title": "Standard page",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.StructureStrip-1.0",
+      "machineName": "H5P.StructureStrip",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 6,
+      "title": "Structure Strip",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Summary-1.10",
+      "machineName": "H5P.Summary",
+      "majorVersion": 1,
+      "minorVersion": 10,
+      "patchVersion": 22,
+      "title": "Summary",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Table-1.1",
+      "machineName": "H5P.Table",
+      "majorVersion": 1,
+      "minorVersion": 1,
+      "patchVersion": 18,
+      "title": "Table",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.Table-1.2",
+      "machineName": "H5P.Table",
+      "majorVersion": 1,
+      "minorVersion": 2,
+      "patchVersion": 2,
+      "title": "Table",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.Text-1.1",
+      "machineName": "H5P.Text",
+      "majorVersion": 1,
+      "minorVersion": 1,
+      "patchVersion": 17,
+      "title": "Text",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.TextInputField-1.2",
+      "machineName": "H5P.TextInputField",
+      "majorVersion": 1,
+      "minorVersion": 2,
+      "patchVersion": 17,
+      "title": "Text input field editor element",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.TextUtilities-1.3",
+      "machineName": "H5P.TextUtilities",
+      "majorVersion": 1,
+      "minorVersion": 3,
+      "patchVersion": 0,
+      "title": "Text Utilities",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.ThreeImage-0.5",
+      "machineName": "H5P.ThreeImage",
+      "majorVersion": 0,
+      "minorVersion": 5,
+      "patchVersion": 8,
+      "title": "Virtual Tour (360)",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.ThreeJS-1.0",
+      "machineName": "H5P.ThreeJS",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 108,
+      "title": "three.js",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.ThreeSixty-0.3",
+      "machineName": "H5P.ThreeSixty",
+      "majorVersion": 0,
+      "minorVersion": 3,
+      "patchVersion": 7,
+      "title": "Three Sixty",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.Timeline-1.1",
+      "machineName": "H5P.Timeline",
+      "majorVersion": 1,
+      "minorVersion": 1,
+      "patchVersion": 25,
+      "title": "Timeline",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Timer-0.4",
+      "machineName": "H5P.Timer",
+      "majorVersion": 0,
+      "minorVersion": 4,
+      "patchVersion": 2,
+      "title": "Timer",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.Transition-1.0",
+      "machineName": "H5P.Transition",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 4,
+      "title": "Transition",
+      "runnable": false
+    },
+    {
+      "directory": "H5P.TrueFalse-1.8",
+      "machineName": "H5P.TrueFalse",
+      "majorVersion": 1,
+      "minorVersion": 8,
+      "patchVersion": 11,
+      "title": "True/False Question",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.TwitterUserFeed-1.0",
+      "machineName": "H5P.TwitterUserFeed",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 21,
+      "title": "Twitter User Feed",
+      "runnable": true
+    },
+    {
+      "directory": "H5P.Video-1.6",
+      "machineName": "H5P.Video",
+      "majorVersion": 1,
+      "minorVersion": 6,
+      "patchVersion": 66,
+      "title": "Video",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.ARMarkerGenerator-1.0",
+      "machineName": "H5PEditor.ARMarkerGenerator",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 3,
+      "title": "H5PEditor.ARMarkerGenerator",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.AudioRecorder-1.0",
+      "machineName": "H5PEditor.AudioRecorder",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 11,
+      "title": "H5P Editor Audio Recorder",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.BranchingQuestion-1.0",
+      "machineName": "H5PEditor.BranchingQuestion",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 5,
+      "title": "Branching Question Editor",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.BranchingScenario-1.5",
+      "machineName": "H5PEditor.BranchingScenario",
+      "majorVersion": 1,
+      "minorVersion": 5,
+      "patchVersion": 7,
+      "title": "Branching Scenario Editor",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.Collage-0.3",
+      "machineName": "H5PEditor.Collage",
+      "majorVersion": 0,
+      "minorVersion": 3,
+      "patchVersion": 22,
+      "title": "Collage Editor",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.ColorSelector-1.0",
+      "machineName": "H5PEditor.ColorSelector",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 3,
+      "title": "H5PEditor.ColorSelector",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.ColorSelector-1.3",
+      "machineName": "H5PEditor.ColorSelector",
+      "majorVersion": 1,
+      "minorVersion": 3,
+      "patchVersion": 1,
+      "title": "H5PEditor.ColorSelector",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.CoursePresentation-1.25",
+      "machineName": "H5PEditor.CoursePresentation",
+      "majorVersion": 1,
+      "minorVersion": 25,
+      "patchVersion": 14,
+      "title": "Course Presentation Editor",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.DateTime-1.0",
+      "machineName": "H5PEditor.DateTime",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 9,
+      "title": "H5PEditor.DateTime",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.DragQuestion-1.10",
+      "machineName": "H5PEditor.DragQuestion",
+      "majorVersion": 1,
+      "minorVersion": 10,
+      "patchVersion": 21,
+      "title": "Drag Question Editor",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.Duration-1.1",
+      "machineName": "H5PEditor.Duration",
+      "majorVersion": 1,
+      "minorVersion": 1,
+      "patchVersion": 14,
+      "title": "H5PEditor.Duration",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.GameMap-1.2",
+      "machineName": "H5PEditor.GameMap",
+      "majorVersion": 1,
+      "minorVersion": 2,
+      "patchVersion": 4,
+      "title": "H5PEditor.GameMap",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.ImageCoordinateSelector-1.2",
+      "machineName": "H5PEditor.ImageCoordinateSelector",
+      "majorVersion": 1,
+      "minorVersion": 2,
+      "patchVersion": 7,
+      "title": "H5PEditor.ImageCoordinateSelector",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.ImageHotspotQuestion-1.8",
+      "machineName": "H5PEditor.ImageHotspotQuestion",
+      "majorVersion": 1,
+      "minorVersion": 8,
+      "patchVersion": 12,
+      "title": "Image Hotspot Question Editor",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.ImageMultipleHotspotQuestion-1.0",
+      "machineName": "H5PEditor.ImageMultipleHotspotQuestion",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 0,
+      "title": "Image Multiple Hotspot Question Editor",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.ImportantDescription-0.1",
+      "machineName": "H5PEditor.ImportantDescription",
+      "majorVersion": 0,
+      "minorVersion": 1,
+      "patchVersion": 4,
+      "title": "H5PEditor.ImportantDescription",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.InfoWall-0.2",
+      "machineName": "H5PEditor.InfoWall",
+      "majorVersion": 0,
+      "minorVersion": 2,
+      "patchVersion": 6,
+      "title": "H5PEditor.InfoWall",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.InfoWallPassiveList-0.1",
+      "machineName": "H5PEditor.InfoWallPassiveList",
+      "majorVersion": 0,
+      "minorVersion": 1,
+      "patchVersion": 5,
+      "title": "H5PEditor.InfoWallPassiveList",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.InputRow-1.0",
+      "machineName": "H5PEditor.InputRow",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 1,
+      "title": "H5PEditor.InputRow",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.InteractiveVideo-1.25",
+      "machineName": "H5PEditor.InteractiveVideo",
+      "majorVersion": 1,
+      "minorVersion": 25,
+      "patchVersion": 11,
+      "title": "Interactive Video Editor",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.KewArCode-1.0",
+      "machineName": "H5PEditor.KewArCode",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 0,
+      "title": "H5PEditor.KewArCode",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.QuestionSetTextualEditor-1.3",
+      "machineName": "H5PEditor.QuestionSetTextualEditor",
+      "majorVersion": 1,
+      "minorVersion": 3,
+      "patchVersion": 18,
+      "title": "H5P Editor Question Set Textual Editor",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.RadioGroup-1.1",
+      "machineName": "H5PEditor.RadioGroup",
+      "majorVersion": 1,
+      "minorVersion": 1,
+      "patchVersion": 4,
+      "title": "H5PEditor.RadioGroup",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.RadioSelector-1.2",
+      "machineName": "H5PEditor.RadioSelector",
+      "majorVersion": 1,
+      "minorVersion": 2,
+      "patchVersion": 2,
+      "title": "H5PEditor.RadioSelector",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.RangeList-1.0",
+      "machineName": "H5PEditor.RangeList",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 13,
+      "title": "H5P Editor Range List",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.SelectToggleFields-1.1",
+      "machineName": "H5PEditor.SelectToggleFields",
+      "majorVersion": 1,
+      "minorVersion": 1,
+      "patchVersion": 1,
+      "title": "Toggle visibility of fields when selecting options in list",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.Shape-1.0",
+      "machineName": "H5PEditor.Shape",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 0,
+      "title": "H5PEditor.Shape",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.ShowWhen-1.0",
+      "machineName": "H5PEditor.ShowWhen",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 9,
+      "title": "Toggle visibility of a field based on rules",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.SingleChoiceSetTextualEditor-1.0",
+      "machineName": "H5PEditor.SingleChoiceSetTextualEditor",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 10,
+      "title": "H5P Editor Single Choice Set Textual Editor",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.SummaryTextualEditor-1.1",
+      "machineName": "H5PEditor.SummaryTextualEditor",
+      "majorVersion": 1,
+      "minorVersion": 1,
+      "patchVersion": 12,
+      "title": "H5P Editor Summary Textual Editor",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.TableList-1.0",
+      "machineName": "H5PEditor.TableList",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 4,
+      "title": "H5P Editor Table List",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.ThreeDModelLoader-1.0",
+      "machineName": "H5PEditor.ThreeDModelLoader",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 4,
+      "title": "H5PEditor.ThreeDModelLoader",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.ThreeImage-0.5",
+      "machineName": "H5PEditor.ThreeImage",
+      "majorVersion": 0,
+      "minorVersion": 5,
+      "patchVersion": 2,
+      "title": "Three Image Editor",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.Timecode-1.2",
+      "machineName": "H5PEditor.Timecode",
+      "majorVersion": 1,
+      "minorVersion": 2,
+      "patchVersion": 14,
+      "title": "Timecode Editor",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.UrlField-1.2",
+      "machineName": "H5PEditor.UrlField",
+      "majorVersion": 1,
+      "minorVersion": 2,
+      "patchVersion": 2,
+      "title": "Url Field",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.VerticalTabs-1.3",
+      "machineName": "H5PEditor.VerticalTabs",
+      "majorVersion": 1,
+      "minorVersion": 3,
+      "patchVersion": 14,
+      "title": "H5P Editor Vertical Tabs",
+      "runnable": false
+    },
+    {
+      "directory": "H5PEditor.Wizard-1.2",
+      "machineName": "H5PEditor.Wizard",
+      "majorVersion": 1,
+      "minorVersion": 2,
+      "patchVersion": 17,
+      "title": "H5PEditor.Wizard",
+      "runnable": false
+    },
+    {
+      "directory": "jQuery.ui-1.10",
+      "machineName": "jQuery.ui",
+      "majorVersion": 1,
+      "minorVersion": 10,
+      "patchVersion": 22,
+      "title": "UI",
+      "runnable": false
+    },
+    {
+      "directory": "Shepherd-1.0",
+      "machineName": "Shepherd",
+      "majorVersion": 1,
+      "minorVersion": 0,
+      "patchVersion": 7,
+      "title": "Shepherd",
+      "runnable": false
+    },
+    {
+      "directory": "TimelineJS-1.1",
+      "machineName": "TimelineJS",
+      "majorVersion": 1,
+      "minorVersion": 1,
+      "patchVersion": 1,
+      "title": "TimelineJS",
+      "runnable": false
+    }
+  ],
+  "archive": {
+    "file": "h5p-libraries-2026.08.12-7199d304.zip",
+    "bytes": 12985032,
+    "fileCount": 4778,
+    "sha256": "edb913adf7c15ab6a65d674d1b2a7673869469549e10fb0c83e8e6dc4a43f9bc"
+  }
+}

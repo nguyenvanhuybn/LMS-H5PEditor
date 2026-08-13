@@ -23,6 +23,10 @@ export type ContentItem = {
   updatedAt: string;
   attemptCount: number;
   latestScore?: number | null;
+  /** How an attempt is judged complete; see CompletionRuleModal. */
+  completionMode?: "Default" | "Score" | "Position";
+  passRatio?: number;
+  minPosition?: number;
 };
 
 export type GradeItem = {
@@ -55,6 +59,25 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 
   if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
+}
+
+/**
+ * Persists a content's completion rule. Shared because the export dialog saves
+ * it too — the rule is compiled into the package, so it has to be stored before
+ * the package is built.
+ */
+export function saveCompletionRule(
+  h5pContentId: string,
+  rule: { mode: string; passPercent: number; minPosition: number },
+) {
+  return apiFetch(`/api/contents/${encodeURIComponent(h5pContentId)}/completion`, {
+    method: "PUT",
+    body: JSON.stringify({
+      mode: rule.mode,
+      passRatio: rule.passPercent / 100,
+      minPosition: rule.minPosition,
+    }),
+  });
 }
 
 export function compactLibraryName(value?: string | null) {

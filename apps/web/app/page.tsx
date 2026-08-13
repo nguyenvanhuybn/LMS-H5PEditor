@@ -3,6 +3,7 @@
 import {
   ArrowRightOutlined,
   BookOutlined,
+  CheckCircleOutlined,
   DeleteOutlined,
   DownloadOutlined,
   EditOutlined,
@@ -33,6 +34,7 @@ import type { TableProps } from "antd";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { CompletionRuleModal } from "@/components/CompletionRuleModal";
 import { useLocale } from "@/components/LocaleProvider";
 import { PackageDownloadModal } from "@/components/PackageDownloadModal";
 import { apiFetch, compactLibraryName, type ContentItem } from "@/lib/api";
@@ -44,6 +46,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [engineOnline, setEngineOnline] = useState<boolean | null>(null);
   const [packageFor, setPackageFor] = useState<ContentItem>();
+  const [completionFor, setCompletionFor] = useState<ContentItem>();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -118,6 +121,20 @@ export default function DashboardPage() {
         : <Progress percent={Math.round(value * 100)} size="small" style={{ width: 110 }} />,
     },
     {
+      title: t("home.colCompletion"),
+      key: "completion",
+      width: 150,
+      render: (_, item) => {
+        if (item.completionMode === "Score") {
+          return <Tag color="green">{t("completion.summaryScore", { percent: Math.round((item.passRatio ?? 0.5) * 100) })}</Tag>;
+        }
+        if (item.completionMode === "Position") {
+          return <Tag color="purple">{t("completion.summaryPosition", { position: item.minPosition ?? 1 })}</Tag>;
+        }
+        return <Typography.Text type="secondary">{t("completion.summaryDefault")}</Typography.Text>;
+      },
+    },
+    {
       title: t("home.colUpdated"),
       dataIndex: "updatedAt",
       width: 145,
@@ -136,6 +153,7 @@ export default function DashboardPage() {
               { key: "play", icon: <EyeOutlined />, label: <Link href={`/contents/${item.h5pContentId}/play`}>{t("home.actionPlay")}</Link> },
               { key: "edit", icon: <EditOutlined />, label: <Link href={`/contents/${item.h5pContentId}/edit`}>{t("home.actionEdit")}</Link> },
               { key: "grades", icon: <TrophyOutlined />, label: <Link href={`/contents/${item.h5pContentId}/grades`}>{t("home.actionGrades")}</Link> },
+              { key: "completion", icon: <CheckCircleOutlined />, label: t("home.actionCompletion"), onClick: () => setCompletionFor(item) },
               { key: "package", icon: <DownloadOutlined />, label: t("home.actionPackage"), onClick: () => setPackageFor(item) },
               { type: "divider" },
               { key: "delete", danger: true, icon: <DeleteOutlined />, label: t("home.actionDelete"), onClick: () => remove(item) },
@@ -213,6 +231,14 @@ export default function DashboardPage() {
         content={packageFor}
         open={Boolean(packageFor)}
         onClose={() => setPackageFor(undefined)}
+        onSaved={() => void load()}
+      />
+
+      <CompletionRuleModal
+        content={completionFor}
+        open={Boolean(completionFor)}
+        onClose={() => setCompletionFor(undefined)}
+        onSaved={() => void load()}
       />
     </main>
   );

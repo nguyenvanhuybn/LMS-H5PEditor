@@ -16,6 +16,33 @@ public sealed class H5pEngineClient(HttpClient httpClient, IOptions<H5pOptions> 
         return request;
     }
 
+    /// <summary>
+    /// Origins the engine will post results to. Null when the engine cannot be
+    /// asked, which callers must treat as "unknown" rather than "none".
+    /// </summary>
+    public async Task<string[]?> GetEmbedOriginsAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            using var response = await httpClient.GetAsync("api/embed-origins", cancellationToken);
+            if (!response.IsSuccessStatusCode) return null;
+
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var json = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+            if (!json.RootElement.TryGetProperty("origins", out var origins)) return null;
+
+            return origins.EnumerateArray()
+                .Select(item => item.GetString())
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Select(value => value!)
+                .ToArray();
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            return null;
+        }
+    }
+
     public async Task<bool> IsHealthyAsync(CancellationToken cancellationToken)
     {
         try
@@ -74,9 +101,15 @@ public sealed class H5pEngineClient(HttpClient httpClient, IOptions<H5pOptions> 
     /// Player URL with no learner attached, for embedders that supply the learner
     /// themselves at runtime (the SCORM wrapper reads it from the LMS API).
     /// </summary>
-    public string BuildPlayerLaunchUrl(string contentId, string? language = null)
+    /// <param name="relayResults">
+    /// Whether the player should also post results back to this API. An exported
+    /// package normally reports through its host's runtime instead, and having
+    /// two systems of record for the same attempt causes more confusion than it
+    /// solves.
+    /// </param>
+    public string BuildPlayerLaunchUrl(string contentId, string? language = null, bool relayResults = false)
     {
-        var query = $"uiLanguage={Uri.EscapeDataString(ResolveLanguage(language))}";
+        var query = $"uiLanguage={Uri.EscapeDataString(ResolveLanguage(language))}&relay={(relayResults ? "1" : "0")}";
         return $"{_options.PublicUrl.TrimEnd('/')}/play/{Uri.EscapeDataString(contentId)}?{query}";
     }
 

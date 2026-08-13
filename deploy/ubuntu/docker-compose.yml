@@ -38,6 +38,14 @@ services:
       H5p__SupportedLanguages__0: vi
       H5p__SupportedLanguages__1: en
       Integration__ApiKey: ${INTEGRATION_API_KEY}
+      # "*" lets any LMS host an exported package; the export dialog then drops
+      # the origin picker entirely. Replace with explicit origins to restrict.
+      Integration__AllowedLmsOrigins__0: ${LMS_ORIGINS:-*}
+      Lrs__Enabled: ${LRS_ENABLED:-false}
+      Lrs__Endpoint: ${LRS_ENDPOINT:-}
+      Lrs__Username: ${LRS_USERNAME:-}
+      Lrs__Password: ${LRS_PASSWORD:-}
+      Lrs__ActorHomePage: ${PUBLIC_ORIGIN}
       Cors__AllowedOrigins__0: ${PUBLIC_ORIGIN}
     volumes:
       - api-data:/app/data
@@ -53,7 +61,11 @@ services:
       PORT: 3001
       H5P_BASE_URL: ${PUBLIC_ORIGIN}/h5p-engine
       H5P_DATA_PATH: /data/h5p
-      H5P_ALLOWED_ORIGINS: ${PUBLIC_ORIGIN}
+      # Must cover every origin in Integration__AllowedLmsOrigins, otherwise the
+      # player posts results to an origin the LMS never listens on and every
+      # score silently disappears. "*" accepts all; the postMessage target is
+      # still the embedder's exact origin, never a literal "*".
+      H5P_ALLOWED_ORIGINS: ${LMS_ORIGINS:-*}
       H5P_PARENT_ORIGIN: ${PUBLIC_ORIGIN}
       H5P_WEBHOOK_URL: http://api:8080/api/h5p/xapi
       H5P_WEBHOOK_SECRET: ${H5P_WEBHOOK_SECRET}

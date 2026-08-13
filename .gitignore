@@ -13,8 +13,15 @@ npm-debug.log*
 services/h5p-engine/h5p/content/
 services/h5p-engine/h5p/libraries/
 services/h5p-engine/h5p/temp/
+# Learner progress for resuming a session; runtime data, never source.
+services/h5p-engine/h5p/user-data/
 services/h5p-engine/h5p/config.json
 services/h5p-engine/h5p/cache.json
+
+# services/h5p-engine/library-bundles/ is deliberately NOT ignored: it is the
+# versioned content type bundle a new environment restores from instead of
+# re-downloading everything from the H5P Hub. Ignore it only if you publish the
+# bundle as a release artifact instead of committing it.
 
 # Environment and IDE
 .env

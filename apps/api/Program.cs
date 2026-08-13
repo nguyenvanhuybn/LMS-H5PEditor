@@ -1,12 +1,19 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using H5pLms.Api.Data;
 using H5pLms.Api.Models;
 using H5pLms.Api.Services;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Enums cross the wire as names ("Score"), not ordinals: the web client and the
+// package builder both match on the name, and an ordinal would silently shift if
+// a mode were ever inserted.
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 builder.Services.Configure<H5pOptions>(builder.Configuration.GetSection(H5pOptions.SectionName));
 builder.Services.Configure<IntegrationOptions>(builder.Configuration.GetSection(IntegrationOptions.SectionName));
@@ -96,14 +103,34 @@ integration.MapGet("/results", async (
     return Results.Ok(page);
 });
 
-// Origins the UI can offer when building a package.
-integration.MapGet("/lms-origins", (IOptions<IntegrationOptions> integrationOptions) =>
-    Results.Ok(new { origins = integrationOptions.Value.AllowedLmsOrigins }));
+// Origins the UI can offer when building a package. Each carries whether the
+// engine will actually post results to it, so the UI can rule out a choice that
+// would produce a package the LMS never hears from.
+integration.MapGet("/lms-origins", async (
+    IOptions<IntegrationOptions> integrationOptions,
+    H5pEngineClient engine,
+    CancellationToken ct) =>
+{
+    var engineOrigins = await engine.GetEmbedOriginsAsync(ct);
+    // Null means the engine could not be asked; do not claim it will fail.
+    var engineAcceptsAll = engineOrigins is null || engineOrigins.Contains("*");
+
+    var origins = integrationOptions.Value.AllowedLmsOrigins.Select(origin => new
+    {
+        origin,
+        // A "*" entry is only usable when the engine side is wildcarded too.
+        engineAccepts = engineAcceptsAll
+            || (origin != "*" && engineOrigins!.Contains(origin, StringComparer.OrdinalIgnoreCase))
+    });
+
+    return Results.Ok(new { origins, engineOrigins });
+});
 
 integration.MapGet("/contents/{h5pContentId}/package", async (
     string h5pContentId,
     string lmsOrigin,
     string? format,
+    bool? relayResults,
     AppDatabase db,
     H5pEngineClient engine,
     PackageBuilder packages,
@@ -118,13 +145,21 @@ integration.MapGet("/contents/{h5pContentId}/package", async (
     var content = await db.GetContentAsync(h5pContentId, ct);
     if (content is null) return Results.NotFound();
 
-    if (!Uri.TryCreate(lmsOrigin, UriKind.Absolute, out var lmsUri) ||
-        lmsUri.Scheme is not ("http" or "https"))
+    string origin;
+    if (lmsOrigin == "*")
     {
-        return Results.BadRequest(new { error = "lmsOrigin phải là URL http(s) tuyệt đối." });
+        origin = "*";
+    }
+    else if (Uri.TryCreate(lmsOrigin, UriKind.Absolute, out var lmsUri) &&
+        lmsUri.Scheme is "http" or "https")
+    {
+        origin = lmsUri.GetLeftPart(UriPartial.Authority);
+    }
+    else
+    {
+        return Results.BadRequest(new { error = "lmsOrigin phải là URL http(s) tuyệt đối hoặc \"*\"." });
     }
 
-    var origin = lmsUri.GetLeftPart(UriPartial.Authority);
     if (!packages.IsOriginAllowed(origin))
     {
         return Results.BadRequest(new
@@ -133,9 +168,26 @@ integration.MapGet("/contents/{h5pContentId}/package", async (
         });
     }
 
+    // The engine posts results to the embedding page and silently falls back to
+    // its own origin for anything it does not recognise, which would leave the
+    // LMS with no results at all. Refuse to build a package that would do that.
+    var embedOrigins = await engine.GetEmbedOriginsAsync(ct);
+    var engineAcceptsAll = embedOrigins is null || embedOrigins.Contains("*");
+    if (!engineAcceptsAll &&
+        (origin == "*" || !embedOrigins!.Contains(origin, StringComparer.OrdinalIgnoreCase)))
+    {
+        return Results.BadRequest(new
+        {
+            error = $"H5P Engine không chấp nhận origin '{origin}', nên kết quả sẽ không tới được LMS. "
+                  + $"Thêm origin này vào H5P_ALLOWED_ORIGINS rồi khởi động lại engine. "
+                  + $"Engine đang chấp nhận: {string.Join(", ", embedOrigins!)}."
+        });
+    }
+
     // The package runtime appends its own userId/userName from the host, so the
-    // launch URL is built without a learner.
-    var playerUrl = engine.BuildPlayerLaunchUrl(content.H5pContentId);
+    // launch URL is built without a learner. Results go to the host's runtime by
+    // default; relayResults=true additionally feeds /api/integration/results.
+    var playerUrl = engine.BuildPlayerLaunchUrl(content.H5pContentId, relayResults: relayResults ?? false);
     var playerOrigin = new Uri(h5pOptions.Value.PublicUrl).GetLeftPart(UriPartial.Authority);
 
     var package = packages.Build(content, playerUrl, playerOrigin, packageFormat);
@@ -183,6 +235,26 @@ api.MapGet("/contents/{h5pContentId}/grades", (
     string h5pContentId,
     AppDatabase db,
     CancellationToken ct) => db.ListGradesAsync(h5pContentId, ct));
+
+api.MapPut("/contents/{h5pContentId}/completion", async (
+    string h5pContentId,
+    CompletionRuleRequest request,
+    AppDatabase db,
+    CancellationToken ct) =>
+{
+    if (!Enum.TryParse<CompletionMode>(request.Mode, ignoreCase: true, out var mode))
+    {
+        return Results.BadRequest(new { error = "Mode phải là Default, Score hoặc Position." });
+    }
+
+    var rule = new CompletionRule(
+        mode,
+        request.PassRatio ?? CompletionRule.Default.PassRatio,
+        request.MinPosition ?? CompletionRule.Default.MinPosition);
+
+    var updated = await db.UpdateCompletionRuleAsync(h5pContentId, rule, ct);
+    return updated is null ? Results.NotFound() : Results.Ok(updated);
+});
 
 api.MapGet("/h5p/editor-url", (
     string returnUrl,
@@ -241,35 +313,37 @@ api.MapPost("/h5p/xapi", async (
         ? scoreNode
         : default;
 
+    // Distinguish "unknown content" from "rule says this event is not a result",
+    // which SaveGradeAsync signals the same way.
+    if (await db.GetContentAsync(payload.ContentId, ct) is null)
+    {
+        return Results.NotFound(new { error = "Nội dung chưa được đăng ký trong LMS." });
+    }
+
     var raw = GetDouble(score, "raw");
     var max = GetDouble(score, "max", 1);
     var completed = GetBoolean(result, "completion");
     var success = GetBoolean(result, "success");
     var verb = GetVerb(payload.Statement);
+    var position = GetPosition(payload.Statement);
+    var userId = payload.UserId ?? "anonymous";
 
     var grade = await db.SaveGradeAsync(
-        payload.ContentId,
-        payload.UserId ?? "anonymous",
-        raw,
-        max,
-        completed,
-        success,
-        verb,
-        payload.Statement.GetRawText(),
-        ct);
-
-    if (grade is null)
-    {
-        return Results.NotFound(new { error = "Nội dung chưa được đăng ký trong LMS." });
-    }
+        payload.ContentId, userId, raw, max, completed, success, verb, position,
+        payload.Statement.GetRawText(), ct);
 
     // Best effort: the attempt is already persisted, so an LRS outage must not
     // fail the webhook and make the player report an error to the learner.
-    var forwarded = await lrs.SendAsync(payload.Statement, payload.UserId ?? "anonymous", ct);
+    var forwarded = await lrs.SendAsync(payload.Statement, userId, ct);
 
-    return Results.Ok(new { grade.Id, grade.ContentId, grade.UserId, grade.ScoreRaw, grade.ScoreMax,
-        grade.ScoreScaled, grade.Completed, grade.Success, grade.Verb, grade.AttemptedAt,
-        forwardedToLrs = forwarded });
+    if (grade is null)
+    {
+        return Results.Ok(new { recorded = false, verb, position, forwardedToLrs = forwarded });
+    }
+
+    return Results.Ok(new { recorded = true, grade.Id, grade.ContentId, grade.UserId, grade.ScoreRaw,
+        grade.ScoreMax, grade.ScoreScaled, grade.Completed, grade.Success, grade.Verb, grade.AttemptedAt,
+        position, forwardedToLrs = forwarded });
 });
 
 app.Run();
@@ -302,6 +376,41 @@ static bool GetBoolean(JsonElement element, string property) =>
     element.ValueKind == JsonValueKind.Object &&
     element.TryGetProperty(property, out var value) &&
     value.ValueKind is JsonValueKind.True;
+
+/// <summary>
+/// H5P reports how far a learner got through the tincanapi "ending-point"
+/// extension. Slide-based content types put it on the object definition, some
+/// put it on the context, so both are checked.
+/// </summary>
+static int? GetPosition(JsonElement statement)
+{
+    const string EndingPoint = "http://id.tincanapi.com/extension/ending-point";
+
+    if (statement.TryGetProperty("object", out var obj) &&
+        obj.TryGetProperty("definition", out var definition) &&
+        TryReadExtension(definition, EndingPoint, out var fromObject))
+    {
+        return fromObject;
+    }
+
+    if (statement.TryGetProperty("context", out var context) &&
+        TryReadExtension(context, EndingPoint, out var fromContext))
+    {
+        return fromContext;
+    }
+
+    return null;
+
+    static bool TryReadExtension(JsonElement owner, string key, out int value)
+    {
+        value = 0;
+        return owner.TryGetProperty("extensions", out var extensions)
+            && extensions.ValueKind == JsonValueKind.Object
+            && extensions.TryGetProperty(key, out var node)
+            && node.ValueKind == JsonValueKind.Number
+            && node.TryGetInt32(out value);
+    }
+}
 
 static string GetVerb(JsonElement statement)
 {
